@@ -1,0 +1,36 @@
+version: '3'
+services:
+  asterisk:
+      build:
+        args:
+          - ASTERISK_UID=$CONTAINER_UID
+          - ASTERISK_GID=$CONTAINER_GID
+        context: ./asterisk/src
+      image: asterisk:16.5.0
+      container_name: asterisk
+      hostname: asterisk
+      volumes:
+        - ./asterisk/config:/etc/asterisk
+        - ./asterisk/var/lib/asterisk/sounds:/var/lib/asterisk/sounds
+        - ./asterisk/var/lib/asterisk/keys:/var/lib/asterisk/keys
+        - ./asterisk/var/lib/asterisk/phoneprov:/var/lib/asterisk/phoneprov
+        - ./asterisk/var/spool/asterisk:/var/spool/asterisk
+        - ./asterisk/var/log/asterisk:/var/log/asterisk
+      ports:
+        - "5060:5060/udp"
+      network_mode: "host"
+
+  dhcpd:
+    build:
+      args:
+        - DHCP_UID=$CONTAINER_UID
+        - DHCP_GID=$CONTAINER_GID
+      context: ./dhcpd
+    image: dhcpd:light
+    container_name: dhcpd
+    hostname: dhcp
+    volumes:
+      - ./dhcpd/config/dhcpd.conf:/etc/dhcp/dhcpd.conf
+      - ./dhcpd/data:/var/lib/dhcp
+    ports:
+      - "67:67/udp"
